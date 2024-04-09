@@ -86,7 +86,7 @@ class TypesenseEngine extends Engine
     /**
      * Import the given documents into the index.
      *
-     * @param  \TypesenseCollection  $collectionIndex
+     * @param  TypesenseCollection  $collectionIndex
      * @param  array  $documents
      * @param  string  $action
      * @return \Illuminate\Support\Collection
@@ -496,25 +496,23 @@ class TypesenseEngine extends Engine
     {
         $index = $this->typesense->getCollections()->{$model->searchableAs()};
 
-        try {
-            $index->retrieve();
-
+        if ($index->exists() === true) {
             return $index;
-        } catch (ObjectNotFound $exception) {
-            $schema = config('scout.typesense.model-settings.'.get_class($model).'.collection-schema') ?? [];
-
-            if (method_exists($model, 'typesenseCollectionSchema')) {
-                $schema = $model->typesenseCollectionSchema();
-            }
-
-            if (! isset($schema['name'])) {
-                $schema['name'] = $model->searchableAs();
-            }
-
-            $this->typesense->getCollections()->create($schema);
-
-            return $this->typesense->getCollections()->{$model->searchableAs()};
         }
+
+        $schema = config('scout.typesense.model-settings.'.get_class($model).'.collection-schema') ?? [];
+
+        if (method_exists($model, 'typesenseCollectionSchema')) {
+            $schema = $model->typesenseCollectionSchema();
+        }
+
+        if (! isset($schema['name'])) {
+            $schema['name'] = $model->searchableAs();
+        }
+
+        $this->typesense->getCollections()->create($schema);
+
+        return $this->typesense->getCollections()->{$model->searchableAs()};
     }
 
     /**
