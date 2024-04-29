@@ -510,7 +510,9 @@ class TypesenseEngine extends Engine
 
         $this->typesense->getCollections()->create($schema);
 
-        return $this->typesense->getCollections()->{$model->searchableAs()};
+        $index->setExists(true);
+
+        return $index;
     }
 
     /**
